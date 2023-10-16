@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34205.153
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimbirGOAPI", "SimbirGOAPI\SimbirGOAPI.csproj", "{78E2A1CC-8EC5-4E5D-939F-288555F93B94}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78E2A1CC-8EC5-4E5D-939F-288555F93B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78E2A1CC-8EC5-4E5D-939F-288555F93B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78E2A1CC-8EC5-4E5D-939F-288555F93B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78E2A1CC-8EC5-4E5D-939F-288555F93B94}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {80FFA5A2-739F-4293-B899-FC9B25515EEF}
+	EndGlobalSection
+EndGlobal
