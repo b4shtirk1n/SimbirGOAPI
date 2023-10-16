@@ -42,3 +42,10 @@ C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Npgsql
 C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\System.CodeDom.dll
 C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\obj\Debug\net7.0\SimbirGOAPI.sourcelink.json
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\b4shtirk1n\source\repos\SimbirGOAPI\SimbirGOAPI\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll
