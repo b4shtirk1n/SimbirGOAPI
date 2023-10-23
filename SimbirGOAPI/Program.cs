@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddSwaggerGen(o =>
 {
     o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -34,7 +35,9 @@ builder.Services.AddSwaggerGen(o =>
         }
     });
 });
+
 builder.Services.AddDbContext<PostgresContext>();
+builder.Services.AddSingleton<List<string>>();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthorization();

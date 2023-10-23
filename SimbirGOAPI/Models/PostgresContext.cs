@@ -18,7 +18,7 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("host=localhost:5432; username=postgres; password=2556; Database=postgres");
+        => optionsBuilder.UseNpgsql("Name=ConnectionStrings:SimbirGODB");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

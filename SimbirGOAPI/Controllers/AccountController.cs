@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using SimbirGOAPI.Models;
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -17,17 +16,17 @@ namespace SimbirGOAPI.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly List<string> blackList = new();
-
         private readonly ILogger<AccountController> logger;
         private readonly PostgresContext context;
+        private readonly List<string> blackList;
         private readonly IMemoryCache cache;
 
         public AccountController(ILogger<AccountController> logger, PostgresContext context,
-            IMemoryCache cache)
+            List<string> blackList, IMemoryCache cache)
         {
             this.logger = logger;
             this.context = context;
+            this.blackList = blackList;
             this.cache = cache;
         }
 
@@ -35,6 +34,10 @@ namespace SimbirGOAPI.Controllers
         [HttpPost(nameof(SingIn))]
         public async Task<ActionResult<string>> SingIn(UserDTO user)
         {
+            if (!await context.Database.CanConnectAsync())
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    Error.DB_CONNECTION_FAILED);
+
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username
                 && u.Password == HashPassword(user.Password)) is not User currentUser)
                 return BadRequest("User not exist or uncorrected password");
@@ -46,6 +49,10 @@ namespace SimbirGOAPI.Controllers
         [HttpPost(nameof(SingUp))]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
+            if (!await context.Database.CanConnectAsync())
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    Error.DB_CONNECTION_FAILED);
+
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
 
@@ -61,11 +68,16 @@ namespace SimbirGOAPI.Controllers
         [HttpPost(nameof(LogOut))]
         public IActionResult LogOut()
         {
-            if (IsTokenTerminate())
+            if (AuthOptions.IsTokenTerminate(cache, Request))
                 return Unauthorized();
 
-            blackList.Add(Request.Headers.Authorization);
+            string token = Request.Headers.Authorization;
+
+            blackList.Add(token);
+            logger.LogInformation($"{nameof(SecurityToken)}: {token} add to {nameof(blackList)}");
+
             cache.Set(nameof(SecurityToken), blackList, TimeSpan.FromMinutes(2));
+            logger.LogInformation($"{nameof(blackList)} add to cache");
 
             return Ok();
         }
@@ -73,7 +85,11 @@ namespace SimbirGOAPI.Controllers
         [HttpPost(nameof(Update))]
         public async Task<IActionResult> Update(UserDTO user)
         {
-            if (IsTokenTerminate())
+            if (!await context.Database.CanConnectAsync())
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    Error.DB_CONNECTION_FAILED);
+
+            if (AuthOptions.IsTokenTerminate(cache, Request))
                 return Unauthorized();
 
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username)
@@ -84,24 +100,47 @@ namespace SimbirGOAPI.Controllers
             updateUser.Password = HashPassword(user.Password);
 
             await context.SaveChangesAsync();
+            logger.LogInformation($"User info: {GetClaimValue(nameof(user.Username))}; "
+                + $"{GetClaimValue(nameof(user.Password))}; change to: {user.Username}; "
+                + $"{user.Password}");
+
+            string cacheKey = $"{nameof(User)}{updateUser.Id}";
+
+            cache.Set(cacheKey, updateUser);
+            logger.LogInformation($"{cacheKey} add to cache");
+
             return Ok();
         }
 
         [HttpGet(nameof(Me))]
         public async Task<ActionResult<User>> Me()
         {
-            if (IsTokenTerminate())
+            if (!await context.Database.CanConnectAsync())
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    Error.DB_CONNECTION_FAILED);
+
+            if (AuthOptions.IsTokenTerminate(cache, Request))
                 return Unauthorized();
 
-            return Ok(await context.Users.FirstAsync(u => u.Id
-                == int.Parse(User.Claims.First().Value)));
+            int id = int.Parse(GetClaimValue(nameof(Models.User.Id)));
+            string cacheKey = $"{nameof(User)}{id}";
+
+            if (cache.Get(cacheKey) is not User user)
+            {
+                user = await context.Users.FirstAsync(u => u.Id == id);
+                cache.Set(cacheKey, user);
+                logger.LogInformation($"{cacheKey} add to cache");
+            }
+            return Ok(user);
         }
 
         private static string GenerateToken(User user)
         {
             var claims = new List<Claim>
             {
-                new(nameof(user.Id), $"{user.Id}")
+                new(nameof(user.Id), $"{user.Id}"),
+                new(nameof(user.Username), $"{user.Username}"),
+                new(nameof(user.Password), $"{user.Password}")
             };
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
@@ -114,11 +153,10 @@ namespace SimbirGOAPI.Controllers
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        private bool IsTokenTerminate() =>
-            cache.Get(nameof(SecurityToken)) is List<string> blackList
-                && blackList.Contains(Request.Headers.Authorization);
+        private static string HashPassword(string password)
+            => Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
 
-        private static string HashPassword(string password) =>
-            Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
+        private string GetClaimValue(string type)
+            => User.Claims.First(x => x.Type == type).Value;
     }
 }
