@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
+using SimbirGOAPI.Attributes;
 using SimbirGOAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,6 +15,8 @@ namespace SimbirGOAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [ServiceFilter(typeof(DbConnectionAttribute))]
+    [ServiceFilter(typeof(CheckBlackListAttribute))]
     public class AccountController : ControllerBase
     {
         private readonly ILogger<AccountController> logger;
@@ -32,13 +35,10 @@ namespace SimbirGOAPI.Controllers
             logger.LogInformation($"{this} init");
         }
 
-        [AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<string>> SingIn(UserDTO user)
         {
-            if (!await context.Database.CanConnectAsync())
-                return Error.DB_CONNECTION_FAILED;
-
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username
                 && u.Password == HashPassword(user.Password)) is not User currentUser)
                 return BadRequest("User not exist or uncorrected password");
@@ -49,13 +49,10 @@ namespace SimbirGOAPI.Controllers
             return Ok(token);
         }
 
-        [AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
-            if (!await context.Database.CanConnectAsync())
-                return Error.DB_CONNECTION_FAILED;
-
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
 
@@ -74,9 +71,6 @@ namespace SimbirGOAPI.Controllers
         [HttpPost]
         public IActionResult LogOut()
         {
-            if (AuthOptions.IsTokenTerminate(cache, Request))
-                return Unauthorized();
-
             string token = Request.Headers.Authorization;
 
             blackList.Add(token);
@@ -91,12 +85,6 @@ namespace SimbirGOAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(UserDTO user)
         {
-            if (!await context.Database.CanConnectAsync())
-                return Error.DB_CONNECTION_FAILED;
-
-            if (AuthOptions.IsTokenTerminate(cache, Request))
-                return Unauthorized();
-
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username)
                 is not User updateUser)
                 return BadRequest("This user already exist");
@@ -122,12 +110,6 @@ namespace SimbirGOAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<User>> Me()
         {
-            if (!await context.Database.CanConnectAsync())
-                return Error.DB_CONNECTION_FAILED;
-
-            if (AuthOptions.IsTokenTerminate(cache, Request))
-                return Unauthorized();
-
             int id = int.Parse(GetClaimValue(nameof(Models.User.Id)));
             string cacheKey = $"{nameof(User)}{id}";
 

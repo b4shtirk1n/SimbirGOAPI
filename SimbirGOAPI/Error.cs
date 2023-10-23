@@ -8,5 +8,10 @@ namespace SimbirGOAPI
         {
             StatusCode = StatusCodes.Status503ServiceUnavailable,
         };
+        
+        public static readonly ObjectResult TOKEN_TERMINATED = new("Token terminated")
+        {
+            StatusCode = StatusCodes.Status401Unauthorized,
+        };
     }
 }
