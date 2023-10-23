@@ -1,8 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SimbirGOAPI.Attributes;
@@ -41,8 +37,8 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 
-builder.Services.AddSingleton<CheckBlackListAttribute>();
-builder.Services.AddScoped<DbConnectionAttribute>();
+builder.Services.AddTransient<CheckBlackListAttribute>();
+builder.Services.AddTransient<DbConnectionAttribute>();
 
 builder.Services.AddDbContext<PostgresContext>();
 builder.Services.AddSingleton<List<string>>();
