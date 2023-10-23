@@ -13,7 +13,7 @@ namespace SimbirGOAPI.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class AccountController : ControllerBase
     {
         private readonly ILogger<AccountController> logger;
@@ -28,30 +28,33 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
             this.blackList = blackList;
             this.cache = cache;
+
+            logger.LogInformation($"{this} init");
         }
 
         [AllowAnonymous]
-        [HttpPost(nameof(SingIn))]
+        [HttpPost]
         public async Task<ActionResult<string>> SingIn(UserDTO user)
         {
             if (!await context.Database.CanConnectAsync())
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    Error.DB_CONNECTION_FAILED);
+                return Error.DB_CONNECTION_FAILED;
 
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username
                 && u.Password == HashPassword(user.Password)) is not User currentUser)
                 return BadRequest("User not exist or uncorrected password");
 
-            return Ok(GenerateToken(currentUser));
+            string token = GenerateToken(currentUser);
+            logger.LogInformation($"Generated token: {token}");
+
+            return Ok(token);
         }
 
         [AllowAnonymous]
-        [HttpPost(nameof(SingUp))]
+        [HttpPost]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
             if (!await context.Database.CanConnectAsync())
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    Error.DB_CONNECTION_FAILED);
+                return Error.DB_CONNECTION_FAILED;
 
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
@@ -62,10 +65,13 @@ namespace SimbirGOAPI.Controllers
                 Password = HashPassword(user.Password)
             });
             await context.SaveChangesAsync();
+            logger.LogInformation($"User info: {nameof(user.Username)}: {user.Username}; "
+                + $"{nameof(user.Password)}: {user.Password}; has been register");
+
             return Ok();
         }
 
-        [HttpPost(nameof(LogOut))]
+        [HttpPost]
         public IActionResult LogOut()
         {
             if (AuthOptions.IsTokenTerminate(cache, Request))
@@ -82,12 +88,11 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpPost(nameof(Update))]
+        [HttpPost]
         public async Task<IActionResult> Update(UserDTO user)
         {
             if (!await context.Database.CanConnectAsync())
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    Error.DB_CONNECTION_FAILED);
+                return Error.DB_CONNECTION_FAILED;
 
             if (AuthOptions.IsTokenTerminate(cache, Request))
                 return Unauthorized();
@@ -100,9 +105,11 @@ namespace SimbirGOAPI.Controllers
             updateUser.Password = HashPassword(user.Password);
 
             await context.SaveChangesAsync();
-            logger.LogInformation($"User info: {GetClaimValue(nameof(user.Username))}; "
-                + $"{GetClaimValue(nameof(user.Password))}; change to: {user.Username}; "
-                + $"{user.Password}");
+            logger.LogInformation($"User info: "
+                + $"{nameof(user.Username)}: {GetClaimValue(nameof(user.Username))}; "
+                + $"{nameof(user.Password)}: {GetClaimValue(nameof(user.Password))}; change to: "
+                + $"{nameof(user.Username)}: {user.Username}; "
+                + $"{nameof(user.Password)}: {user.Password}");
 
             string cacheKey = $"{nameof(User)}{updateUser.Id}";
 
@@ -112,12 +119,11 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpGet(nameof(Me))]
+        [HttpGet]
         public async Task<ActionResult<User>> Me()
         {
             if (!await context.Database.CanConnectAsync())
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    Error.DB_CONNECTION_FAILED);
+                return Error.DB_CONNECTION_FAILED;
 
             if (AuthOptions.IsTokenTerminate(cache, Request))
                 return Unauthorized();

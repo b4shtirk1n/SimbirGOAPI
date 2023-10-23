@@ -1,7 +1,12 @@
-﻿namespace SimbirGOAPI
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace SimbirGOAPI
 {
-    public class Error
+    public readonly struct Error
     {
-        public const string DB_CONNECTION_FAILED = "Database connection failed";
+        public static readonly ObjectResult DB_CONNECTION_FAILED = new("Database connection failed")
+        {
+            StatusCode = StatusCodes.Status503ServiceUnavailable,
+        };
     }
 }
