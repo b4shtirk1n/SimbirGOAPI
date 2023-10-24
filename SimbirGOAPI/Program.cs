@@ -37,8 +37,8 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 
-builder.Services.AddSingleton<CheckBlackListAttribute>();
-builder.Services.AddScoped<DbConnectionAttribute>();
+builder.Services.AddTransient<CheckBlackListAttribute>();
+builder.Services.AddTransient<DbConnectionAttribute>();
 
 builder.Services.AddDbContext<SimbirGODbContext>();
 builder.Services.AddSingleton<List<string>>();
