@@ -20,11 +20,11 @@ namespace SimbirGOAPI.Controllers
     public class AccountController : ControllerBase
     {
         private readonly ILogger<AccountController> logger;
-        private readonly PostgresContext context;
+        private readonly SimbirGODbContext context;
         private readonly List<string> blackList;
         private readonly IMemoryCache cache;
 
-        public AccountController(ILogger<AccountController> logger, PostgresContext context,
+        public AccountController(ILogger<AccountController> logger, SimbirGODbContext context,
             List<string> blackList, IMemoryCache cache)
         {
             this.logger = logger;
@@ -59,7 +59,8 @@ namespace SimbirGOAPI.Controllers
             await context.Users.AddAsync(new User
             {
                 Username = user.Username,
-                Password = HashPassword(user.Password)
+                Password = HashPassword(user.Password),
+                Role = (int)RoleEnum.Client
             });
             await context.SaveChangesAsync();
             logger.LogInformation($"User info: {nameof(user.Username)}: {user.Username}; "
@@ -93,10 +94,10 @@ namespace SimbirGOAPI.Controllers
             updateUser.Password = HashPassword(user.Password);
 
             await context.SaveChangesAsync();
-            logger.LogInformation($"User info: "
-                + $"{nameof(user.Username)}: {GetClaimValue(nameof(user.Username))}; "
-                + $"{nameof(user.Password)}: {GetClaimValue(nameof(user.Password))}; change to: "
-                + $"{nameof(user.Username)}: {user.Username}; "
+            logger.LogInformation($"User info:\n"
+                + $"{nameof(user.Username)}: {GetClaimValue(nameof(user.Username))}\n"
+                + $"{nameof(user.Password)}: {GetClaimValue(nameof(user.Password))}\n"
+                + $"change to:\n{nameof(user.Username)}: {user.Username}\n"
                 + $"{nameof(user.Password)}: {user.Password}");
 
             string cacheKey = $"{nameof(User)}{updateUser.Id}";
@@ -122,14 +123,21 @@ namespace SimbirGOAPI.Controllers
             return Ok(user);
         }
 
-        private static string GenerateToken(User user)
+        private string GenerateToken(in User user)
         {
+            logger.LogInformation($"Creating token for {nameof(User)}: {user.Username}");
+
             var claims = new List<Claim>
             {
                 new(nameof(user.Id), $"{user.Id}"),
                 new(nameof(user.Username), $"{user.Username}"),
                 new(nameof(user.Password), $"{user.Password}")
             };
+            logger.LogInformation($"Claims:\n{nameof(user.Id)}: {user.Id}\n"
+                + $"{nameof(user.Username)}: {user.Username}\n"
+                + $"{nameof(user.Password)}: {user.Password}\n"
+                + $"created");
+
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
@@ -138,10 +146,12 @@ namespace SimbirGOAPI.Controllers
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
 
+            logger.LogInformation($"Token: {jwt} created");
+
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        private static string HashPassword(string password)
+        private static string HashPassword(in string password)
             => Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
 
         private string GetClaimValue(string type)

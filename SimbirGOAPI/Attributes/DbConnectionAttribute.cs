@@ -3,18 +3,18 @@ using SimbirGOAPI.Models;
 
 namespace SimbirGOAPI.Attributes
 {
-    public class DbConnectionAttribute : IAsyncExceptionFilter
+    public class DbConnectionAttribute : IAsyncAuthorizationFilter
     {
         private readonly ILogger<DbConnectionAttribute> logger;
-        private readonly PostgresContext context;
+        private readonly SimbirGODbContext context;
 
-        public DbConnectionAttribute(ILogger<DbConnectionAttribute> logger, PostgresContext context)
+        public DbConnectionAttribute(ILogger<DbConnectionAttribute> logger, SimbirGODbContext context)
         {
             this.context = context;
             this.logger = logger;
         }
 
-        public async Task OnExceptionAsync(ExceptionContext context)
+        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             if (!await this.context.Database.CanConnectAsync())
             {
