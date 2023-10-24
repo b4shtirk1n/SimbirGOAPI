@@ -95,8 +95,8 @@ namespace SimbirGOAPI.Controllers
 
             await context.SaveChangesAsync();
             logger.LogInformation($"User info:\n"
-                + $"{nameof(user.Username)}: {GetClaimValue(nameof(user.Username))}\n"
-                + $"{nameof(user.Password)}: {GetClaimValue(nameof(user.Password))}\n"
+                + $"{nameof(user.Username)}: {AuthOptions.GetClaimValue(User, nameof(user.Username))}\n"
+                + $"{nameof(user.Password)}: {AuthOptions.GetClaimValue(User, nameof(user.Password))}\n"
                 + $"change to:\n{nameof(user.Username)}: {user.Username}\n"
                 + $"{nameof(user.Password)}: {user.Password}");
 
@@ -111,7 +111,7 @@ namespace SimbirGOAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<User>> Me()
         {
-            int id = int.Parse(GetClaimValue(nameof(Models.User.Id)));
+            int id = int.Parse(AuthOptions.GetClaimValue(User, nameof(Models.User.Id)));
             string cacheKey = $"{nameof(User)}{id}";
 
             if (cache.Get(cacheKey) is not User user)
@@ -131,7 +131,8 @@ namespace SimbirGOAPI.Controllers
             {
                 new(nameof(user.Id), $"{user.Id}"),
                 new(nameof(user.Username), $"{user.Username}"),
-                new(nameof(user.Password), $"{user.Password}")
+                new(nameof(user.Password), $"{user.Password}"),
+                new(nameof(user.Role), $"{user.Role}")
             };
             logger.LogInformation($"Claims:\n{nameof(user.Id)}: {user.Id}\n"
                 + $"{nameof(user.Username)}: {user.Username}\n"
@@ -153,8 +154,5 @@ namespace SimbirGOAPI.Controllers
 
         private static string HashPassword(in string password)
             => Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
-
-        private string GetClaimValue(string type)
-            => User.Claims.First(x => x.Type == type).Value;
     }
 }
