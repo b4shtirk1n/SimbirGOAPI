@@ -72,5 +72,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-app.Logger.LogInformation("Server is Alive");

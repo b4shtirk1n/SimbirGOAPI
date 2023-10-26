@@ -116,7 +116,11 @@ namespace SimbirGOAPI.Controllers
 
             if (cache.Get(cacheKey) is not User user)
             {
-                user = await context.Users.FirstAsync(u => u.Id == id);
+                user = await context.Users.Select(u => new User
+                {
+                    Username = u.Username,
+                    Balance = u.Balance
+                }).FirstAsync(u => u.Id == id);
                 cache.Set(cacheKey, user);
                 logger.LogInformation($"{cacheKey} add to cache");
             }
