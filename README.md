@@ -25,7 +25,7 @@ docker-compose up
 },
 ```
 
-3. запустить "SimbirGOAPI\SimbirGOAPI\bin\Release\net7.0\SimbirGOAPI.exe"
+3. Запустить "SimbirGOAPI\SimbirGOAPI\bin\Release\net7.0\SimbirGOAPI.exe"
 
 #### URL: http://localhost:5000/swagger/index.html  
 
@@ -33,13 +33,16 @@ docker-compose up
 
 ## Запуск через CLI
 
-Отредактировать конфиг "SimbirGOAPI\SimbirGOAPI\appsettings.json"
+1. Восстановить базу данных из файла "SimbirGODb.backup"
+2. Отредактировать конфиг "SimbirGOAPI\SimbirGOAPI\appsettings.json"
 
 ```json
 "ConnectionStrings": {
     "SimbirGODb": "host=localhost:5432; username=username; password=password; Database=database"
 },
 ```
+
+3. Запустить в консоли
 
 ```powershell
 cd .\SimbirGOAPI\
