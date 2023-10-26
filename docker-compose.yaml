@@ -1,11 +1,5 @@
 version: "3.8"
 services:
-  api:
-    image: simbir-go-api
-    restart: always
-    ports:
-      - 5000:5000
-
   postgres:
     image: postgres
     restart: always
@@ -13,17 +7,16 @@ services:
       POSTGRES_PASSWORD: 1111
       POSTGRES_DB: SimbirGODb
     volumes:
-      - Db:/var/lib/postgresql/data
+      - ./Db:/var/lib/postgresql/data
     ports:
       - 5432:5432
 
   nginx:
-    image: nginx:alpine
+    image: nginx
     restart: always
     depends_on:
       - postgres
-      - api
     volumes:
-      - nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - 80:80
