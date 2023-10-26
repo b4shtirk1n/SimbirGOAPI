@@ -17,7 +17,7 @@ namespace SimbirGOAPI.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (cache.Get(nameof(SecurityToken)) is List<string> blackList
+            if (cache.Get(nameof(SecurityToken)) is List<string?> blackList
                 && blackList.Contains(context.HttpContext.Request.Headers.Authorization))
             {
                 logger.LogError($"{Error.TOKEN_TERMINATED.Value}");

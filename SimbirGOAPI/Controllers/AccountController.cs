@@ -53,6 +53,9 @@ namespace SimbirGOAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
+            if (user == null)
+                return BadRequest();
+
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
 
@@ -72,7 +75,10 @@ namespace SimbirGOAPI.Controllers
         [HttpPost]
         public IActionResult LogOut()
         {
-            string token = Request.Headers.Authorization;
+            string? token = Request.Headers.Authorization;
+
+            if (token == null)
+                throw new NullReferenceException();
 
             blackList.Add(token);
             logger.LogInformation($"{nameof(SecurityToken)}: {token} add to {nameof(blackList)}");
@@ -156,7 +162,12 @@ namespace SimbirGOAPI.Controllers
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        private static string HashPassword(in string password)
-            => Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
+        private static string HashPassword(in string? password)
+        {
+            if (password == null)
+                throw new NullReferenceException("password is empty");
+
+            return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
+        }
     }
 }
