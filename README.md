@@ -11,6 +11,7 @@ docker-compose up
 ```
 
 #### URL: http://localhost:5000/swagger/index.html
+#### URL (Для сервера с настроенным nginx): http://localhost/swagger/index.html
 
 ---
 
