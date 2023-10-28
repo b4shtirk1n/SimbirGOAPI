@@ -47,7 +47,7 @@ docker-compose up
 
 ```powershell
 cd .\SimbirGOAPI\
-dotnet run
+dotnet run -c release
 ```
 
-#### URL: http://localhost:5091/swagger/index.html
+#### URL: http://localhost:5000/swagger/index.html
