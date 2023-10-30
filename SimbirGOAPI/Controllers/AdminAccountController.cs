@@ -40,7 +40,7 @@ namespace SimbirGOAPI.Controllers
             }
         }
         
-        [HttpGet("{id}")]
+        [HttpGet($"{{{nameof(id)}}}")]
         public async Task<ActionResult<User>> GetById(long id)
         {
             string cacheKey = $"{nameof(User)}{id}";
@@ -79,7 +79,7 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut($"{{{nameof(id)}}}")]
         public async Task<IActionResult> Update(long id, UserAdminDTO user)
         {
             if (await context.Users.FindAsync(id) is not User updateUser)
@@ -94,7 +94,7 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete($"{{{nameof(id)}}}")]
         public async Task<IActionResult> Delete(long id)
         {
             if (await context.Users.FindAsync(id) is not User user)

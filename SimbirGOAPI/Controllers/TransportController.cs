@@ -27,7 +27,7 @@ namespace SimbirGOAPI.Controllers
             this.cache = cache;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet($"{{{nameof(id)}}}")]
         public async Task<ActionResult<Transport>> GetById(long id)
         {
             if (await context.Transports.FirstOrDefaultAsync(c => c.Id == id)
@@ -66,7 +66,7 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut($"{{{nameof(id)}}}")]
         public async Task<IActionResult> Update(long id, TransportDTO transport)
         {
             if (transport.Color.GetEnumValue<ColorEnum>() is not ColorEnum color)
@@ -95,7 +95,7 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete($"{{{nameof(id)}}}")]
         public async Task<ActionResult<Transport>> Delete(long id)
         {
             if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.User == long

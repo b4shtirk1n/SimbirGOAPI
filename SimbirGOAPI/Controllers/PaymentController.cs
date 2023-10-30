@@ -23,7 +23,7 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
         }
 
-        [HttpPost("{accountId}")]
+        [HttpPost($"{{{nameof(accountId)}}}")]
         public async Task<IActionResult> Hesoyam(int accountId)
         {
             decimal money = 250000m;

@@ -11,20 +11,24 @@ namespace SimbirGOAPI.Models
         [Required]
         public string Type { get; set; } = null!;
 
+        [Required]
         [StringLength(50)]
         public string Model { get; set; } = null!;
 
         [Required]
         public string Color { get; set; } = null!;
 
+        [Required]
         [StringLength(9)]
         public string Identifier { get; set; } = null!;
 
         public string Description { get; set; } = null!;
 
+        [Required]
         [Precision(3, 7)]
         public decimal Latitude { get; set; }
 
+        [Required]
         [Precision(3, 7)]
         public decimal Longitude { get; set; }
 

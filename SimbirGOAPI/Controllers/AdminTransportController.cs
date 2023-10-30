@@ -25,5 +25,35 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
             this.cache = cache;
         }
+
+        [HttpGet]
+        public async Task<ActionResult<List<Transport>>> GetBetween(int start, int end)
+        {
+            return Ok();
+        }
+
+        [HttpGet(nameof(id))]
+        public async Task<ActionResult<Transport>> GetById(long id)
+        {
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(TransportDTO transport)
+        {
+            return Ok();
+        }
+
+        [HttpPut(nameof(id))]
+        public async Task<IActionResult> Update(long id, TransportDTO transport)
+        {
+            return Ok();
+        }
+
+        [HttpGet(nameof(id))]
+        public async Task<IActionResult> Delete(long id)
+        {
+            return Ok();
+        }
     }
 }
