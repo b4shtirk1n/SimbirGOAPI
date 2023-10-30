@@ -11,10 +11,7 @@ namespace SimbirGOAPI.Models
         public const string AUDIENCE = "Client";
         private const string KEY = "SimbirGOAPI";
 
-        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
-            new(SHA256.HashData(Encoding.UTF8.GetBytes(KEY)));
-
-        public static string GetClaimValue(ClaimsPrincipal user, string type)
-            => user.Claims.First(x => x.Type == type).Value;
+        public static SymmetricSecurityKey GetSymmetricSecurityKey()
+            => new(SHA256.HashData(Encoding.UTF8.GetBytes(KEY)));
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using SimbirGOAPI.Attributes;
+using SimbirGOAPI.Extensions;
 using SimbirGOAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -31,8 +32,26 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
             this.blackList = blackList;
             this.cache = cache;
+        }
 
-            logger.LogInformation($"{this} init");
+        [HttpGet]
+        public async Task<ActionResult<User>> Me()
+        {
+            long id = long.Parse(User.GetClaimValue(nameof(Models.User.Id)));
+            string cacheKey = $"{nameof(User)}{id}";
+
+            if (cache.Get(cacheKey) is not User user)
+            {
+                user = await context.Users.FirstAsync(u => u.Id == id);
+
+                cache.Set(cacheKey, user);
+                logger.LogInformation($"{cacheKey} add to cache");
+            }
+            else
+            {
+                logger.LogInformation($"{cacheKey} taken from cache");
+            }
+            return Ok(user);
         }
 
         [HttpPost]
@@ -53,9 +72,6 @@ namespace SimbirGOAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
-            if (user == null)
-                return BadRequest();
-
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
 
@@ -63,7 +79,7 @@ namespace SimbirGOAPI.Controllers
             {
                 Username = user.Username,
                 Password = HashPassword(user.Password),
-                Role = (int)RoleEnum.Client
+                Role = (int)RoleEnum.Client,
             });
             await context.SaveChangesAsync();
             logger.LogInformation($"User info: {nameof(user.Username)}: {user.Username}; "
@@ -73,12 +89,9 @@ namespace SimbirGOAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult LogOut()
+        public IActionResult SingOut()
         {
-            string? token = Request.Headers.Authorization;
-
-            if (token == null)
-                throw new NullReferenceException();
+            string token = Request.Headers.Authorization!;
 
             blackList.Add(token);
             logger.LogInformation($"{nameof(SecurityToken)}: {token} add to {nameof(blackList)}");
@@ -89,20 +102,22 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> Update(UserDTO user)
         {
-            if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username)
-                is not User updateUser)
+            if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest("This user already exist");
+
+            var updateUser = await context.Users.FirstAsync(u => u.Id == long.Parse(User
+                .GetClaimValue(nameof(Models.User.Id))));
 
             updateUser.Username = user.Username;
             updateUser.Password = HashPassword(user.Password);
 
             await context.SaveChangesAsync();
             logger.LogInformation($"User info:\n"
-                + $"{nameof(user.Username)}: {AuthOptions.GetClaimValue(User, nameof(user.Username))}\n"
-                + $"{nameof(user.Password)}: {AuthOptions.GetClaimValue(User, nameof(user.Password))}\n"
+                + $"{nameof(user.Username)}: {User.GetClaimValue(nameof(user.Username))}\n"
+                + $"{nameof(user.Password)}: {User.GetClaimValue(nameof(user.Password))}\n"
                 + $"change to:\n{nameof(user.Username)}: {user.Username}\n"
                 + $"{nameof(user.Password)}: {user.Password}");
 
@@ -112,25 +127,6 @@ namespace SimbirGOAPI.Controllers
             logger.LogInformation($"{cacheKey} add to cache");
 
             return Ok();
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<User>> Me()
-        {
-            int id = int.Parse(AuthOptions.GetClaimValue(User, nameof(Models.User.Id)));
-            string cacheKey = $"{nameof(User)}{id}";
-
-            if (cache.Get(cacheKey) is not User user)
-            {
-                user = await context.Users.Select(u => new User
-                {
-                    Username = u.Username,
-                    Balance = u.Balance
-                }).FirstAsync(u => u.Id == id);
-                cache.Set(cacheKey, user);
-                logger.LogInformation($"{cacheKey} add to cache");
-            }
-            return Ok(user);
         }
 
         private string GenerateToken(in User user)
@@ -162,12 +158,7 @@ namespace SimbirGOAPI.Controllers
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        private static string HashPassword(in string? password)
-        {
-            if (password == null)
-                throw new NullReferenceException("password is empty");
-
-            return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
-        }
+        private static string HashPassword(in string password)
+            => Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
     }
 }

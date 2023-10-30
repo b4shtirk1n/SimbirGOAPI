@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimbirGOAPI.Attributes;
+using SimbirGOAPI.Extensions;
 using SimbirGOAPI.Models;
 
 namespace SimbirGOAPI.Controllers
@@ -22,18 +23,17 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
         }
 
-        [HttpPost("{" + nameof(accountId) + "}")]
+        [HttpPost("{accountId}")]
         public async Task<IActionResult> Hesoyam(int accountId)
         {
             decimal money = 250000m;
             string nameId = nameof(Models.User.Id);
-            int currentUser = int.Parse(AuthOptions.GetClaimValue(User, nameId));
+            int currentUser = int.Parse(User.GetClaimValue(nameId));
 
-            if (int.Parse(AuthOptions.GetClaimValue(User, nameof(Models.User.Role)))
+            if (int.Parse(User.GetClaimValue(nameof(Models.User.Role)))
                 == (int)RoleEnum.Client && currentUser != accountId)
             {
-                logger.LogWarning($"User: {nameId}: {currentUser}; "
-                    + $"doesn't have permission");
+                logger.LogWarning($"User: {nameId}: {currentUser}; doesn't have permission");
 
                 return BadRequest("You can add money only yourself");
             }
