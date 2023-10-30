@@ -97,7 +97,7 @@ namespace SimbirGOAPI.Controllers
         }
 
         [HttpDelete($"{{{nameof(id)}}}")]
-        public async Task<ActionResult<Transport>> Delete(long id)
+        public async Task<IActionResult> Delete(long id)
         {
             if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.Owner == UserId)
                 is not Transport transport)

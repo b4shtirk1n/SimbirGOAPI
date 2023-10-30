@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SimbirGOAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c918becb8b131863bb2a30d54977190b1ee9894f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5549bcf58928310239fbaaff1ee0cfe49d232f41")]
 [assembly: System.Reflection.AssemblyProductAttribute("SimbirGOAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SimbirGOAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
