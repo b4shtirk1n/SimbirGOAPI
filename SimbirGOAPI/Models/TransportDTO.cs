@@ -23,10 +23,10 @@ namespace SimbirGOAPI.Models
         public string Description { get; set; } = null!;
 
         [Precision(3, 7)]
-        public double Latitude { get; set; }
+        public decimal Latitude { get; set; }
 
         [Precision(3, 7)]
-        public double Longitude { get; set; }
+        public decimal Longitude { get; set; }
 
         [Precision(5, 2)]
         public decimal MinutePrice { get; set; }

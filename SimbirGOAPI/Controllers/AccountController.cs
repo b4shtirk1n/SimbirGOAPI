@@ -39,10 +39,12 @@ namespace SimbirGOAPI.Controllers
         {
             long id = long.Parse(User.GetClaimValue(nameof(Models.User.Id)));
             string cacheKey = $"{nameof(User)}{id}";
+            User? user = cache.Get(cacheKey) as User;
 
-            if (cache.Get(cacheKey) is not User user)
+            if (user == null)
             {
-                user = await context.Users.FirstAsync(u => u.Id == id);
+                if ((user = await context.Users.FindAsync(id)) == null)
+                    return BadRequest(Error.USER_DOESNT_EXIST);
 
                 cache.Set(cacheKey, user);
                 logger.LogInformation($"{cacheKey} add to cache");
@@ -73,7 +75,7 @@ namespace SimbirGOAPI.Controllers
         public async Task<IActionResult> SingUp(UserDTO user)
         {
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
-                return BadRequest("This user already exist");
+                return BadRequest(Error.USER_EXIST);
 
             await context.Users.AddAsync(new User
             {
@@ -106,10 +108,11 @@ namespace SimbirGOAPI.Controllers
         public async Task<IActionResult> Update(UserDTO user)
         {
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
-                return BadRequest("This user already exist");
+                return BadRequest(Error.USER_EXIST);
 
-            var updateUser = await context.Users.FirstAsync(u => u.Id == long.Parse(User
-                .GetClaimValue(nameof(Models.User.Id))));
+            if (await context.Users.FirstAsync(u => u.Id == long.Parse(User
+                .GetClaimValue(nameof(Models.User.Id)))) is not User updateUser)
+                return BadRequest(Error.USER_DOESNT_EXIST);
 
             updateUser.Username = user.Username;
             updateUser.Password = HashPassword(user.Password);
@@ -138,7 +141,7 @@ namespace SimbirGOAPI.Controllers
                 new(nameof(user.Id), $"{user.Id}"),
                 new(nameof(user.Username), $"{user.Username}"),
                 new(nameof(user.Password), $"{user.Password}"),
-                new(nameof(user.Role), $"{user.Role}")
+                new(ClaimsIdentity.DefaultRoleClaimType, $"{user.RoleNavigation.Name}")
             };
             logger.LogInformation($"Claims:\n{nameof(user.Id)}: {user.Id}\n"
                 + $"{nameof(user.Username)}: {user.Username}\n"

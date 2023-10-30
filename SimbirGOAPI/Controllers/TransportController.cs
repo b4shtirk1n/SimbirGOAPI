@@ -76,7 +76,7 @@ namespace SimbirGOAPI.Controllers
                 .Parse(User.GetClaimValue(nameof(Models.User.Id)))) == null)
                 return BadRequest("Transport doesn't exist or the user is not the owner");
 
-            var updateTransport = await context.Transports.FirstAsync(u => u.Id == long
+            Transport updateTransport = await context.Transports.FirstAsync(u => u.Id == long
                 .Parse(User.GetClaimValue(nameof(Models.User.Id))));
 
             updateTransport.CanRented = transport.CanBeRented;
@@ -84,8 +84,8 @@ namespace SimbirGOAPI.Controllers
             updateTransport.Color = (int)color;
             updateTransport.Identifier = transport.Identifier;
             updateTransport.Description = transport.Description;
-            updateTransport.Latitude = (decimal)transport.Latitude;
-            updateTransport.Longitude = (decimal)transport.Longitude;
+            updateTransport.Latitude = transport.Latitude;
+            updateTransport.Longitude = transport.Longitude;
             updateTransport.MinutePrice = transport.MinutePrice;
             updateTransport.DayPrice = transport.DayPrice;
 
@@ -99,8 +99,11 @@ namespace SimbirGOAPI.Controllers
         public async Task<ActionResult<Transport>> Delete(long id)
         {
             if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.User == long
-                .Parse(User.GetClaimValue(nameof(Models.User.Id)))) == null)
+                .Parse(User.GetClaimValue(nameof(Models.User.Id)))) is not Transport transport)
                 return BadRequest("Transport doesn't exist or the user is not the owner");
+
+            context.Remove(transport);
+            await context.SaveChangesAsync();
 
             return Ok();
         }

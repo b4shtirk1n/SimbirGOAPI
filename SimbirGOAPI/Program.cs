@@ -44,7 +44,7 @@ builder.Services.AddTransient<CheckBlackListAttribute>();
 builder.Services.AddTransient<DbConnectionAttribute>();
 
 builder.Services.AddDbContext<SimbirGODbContext>();
-builder.Services.AddSingleton<List<string>>();
+builder.Services.AddSingleton<List<string>>(); //захардкоженая реализация блек листа для токенов
 builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthorization();
