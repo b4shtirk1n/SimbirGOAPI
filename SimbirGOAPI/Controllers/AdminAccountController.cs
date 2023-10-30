@@ -32,7 +32,8 @@ namespace SimbirGOAPI.Controllers
         {
             try
             {
-                return Ok(await context.Users.Where(u => u.Id >= start).Take(count).ToListAsync());
+                return Ok(await context.Users.Include(o => o.RoleNavigation).Where(u
+                    => u.Id >= start).Take(count).ToListAsync());
             }
             finally
             {
@@ -48,7 +49,8 @@ namespace SimbirGOAPI.Controllers
 
             if (user == null)
             {
-                if ((user = await context.Users.FindAsync(id)) == null)
+                if ((user = await context.Users.Include(o => o.RoleNavigation).FirstOrDefaultAsync(u
+                    => u.Id == id)) == null)
                     return BadRequest(Error.USER_DOESNT_EXIST);
 
                 cache.Set(cacheKey, user);

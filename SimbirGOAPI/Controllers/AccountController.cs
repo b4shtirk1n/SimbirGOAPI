@@ -34,16 +34,18 @@ namespace SimbirGOAPI.Controllers
             this.cache = cache;
         }
 
+        private long UserId => long.Parse(User.GetClaimValue(nameof(Models.User.Id)));
+
         [HttpGet]
         public async Task<ActionResult<User>> Me()
         {
-            long id = long.Parse(User.GetClaimValue(nameof(Models.User.Id)));
-            string cacheKey = $"{nameof(User)}{id}";
+            string cacheKey = $"{nameof(User)}{UserId}";
             User? user = cache.Get(cacheKey) as User;
 
             if (user == null)
             {
-                if ((user = await context.Users.FindAsync(id)) == null)
+                if ((user = await context.Users.Include(o => o.RoleNavigation)
+                    .FirstOrDefaultAsync(u => u.Id == UserId)) == null)
                     return BadRequest(Error.USER_DOESNT_EXIST);
 
                 cache.Set(cacheKey, user);
@@ -60,8 +62,9 @@ namespace SimbirGOAPI.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<string>> SingIn(UserDTO user)
         {
-            if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username
-                && u.Password == HashPassword(user.Password)) is not User currentUser)
+            if (await context.Users.Include(o => o.RoleNavigation).FirstOrDefaultAsync(u
+                => u.Username == user.Username && u.Password == HashPassword(user.Password))
+                is not User currentUser)
                 return BadRequest("User not exist or uncorrected password");
 
             string token = GenerateToken(currentUser);
@@ -74,7 +77,8 @@ namespace SimbirGOAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SingUp(UserDTO user)
         {
-            if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
+            if (await context.Users.Include(o => o.RoleNavigation).FirstOrDefaultAsync(u
+                => u.Username == user.Username) != null)
                 return BadRequest(Error.USER_EXIST);
 
             await context.Users.AddAsync(new User
@@ -110,8 +114,7 @@ namespace SimbirGOAPI.Controllers
             if (await context.Users.FirstOrDefaultAsync(u => u.Username == user.Username) != null)
                 return BadRequest(Error.USER_EXIST);
 
-            if (await context.Users.FirstAsync(u => u.Id == long.Parse(User
-                .GetClaimValue(nameof(Models.User.Id)))) is not User updateUser)
+            if (await context.Users.FirstAsync(u => u.Id == UserId) is not User updateUser)
                 return BadRequest(Error.USER_DOESNT_EXIST);
 
             updateUser.Username = user.Username;

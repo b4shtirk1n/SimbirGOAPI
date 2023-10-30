@@ -23,17 +23,17 @@ namespace SimbirGOAPI.Controllers
             this.context = context;
         }
 
+        private long UserId => int.Parse(User.GetClaimValue(nameof(Models.User.Role)));
+
         [HttpPost($"{{{nameof(accountId)}}}")]
         public async Task<IActionResult> Hesoyam(int accountId)
         {
             decimal money = 250000m;
             string nameId = nameof(Models.User.Id);
-            int currentUser = int.Parse(User.GetClaimValue(nameId));
 
-            if (int.Parse(User.GetClaimValue(nameof(Models.User.Role)))
-                == (int)RoleEnum.Client && currentUser != accountId)
+            if (UserId == (int)RoleEnum.Client && UserId != accountId)
             {
-                logger.LogWarning($"User: {nameId}: {currentUser}; doesn't have permission");
+                logger.LogWarning($"User: {nameId}: {UserId}; doesn't have permission");
 
                 return BadRequest("You can add money only yourself");
             }

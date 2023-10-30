@@ -50,7 +50,7 @@ namespace SimbirGOAPI.Controllers
             return Ok();
         }
 
-        [HttpGet(nameof(id))]
+        [HttpDelete(nameof(id))]
         public async Task<IActionResult> Delete(long id)
         {
             return Ok();

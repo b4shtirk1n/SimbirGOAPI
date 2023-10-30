@@ -27,11 +27,13 @@ namespace SimbirGOAPI.Controllers
             this.cache = cache;
         }
 
+        private long UserId => int.Parse(User.GetClaimValue(nameof(Models.User.Id)));
+
         [HttpGet($"{{{nameof(id)}}}")]
         public async Task<ActionResult<Transport>> GetById(long id)
         {
-            if (await context.Transports.FirstOrDefaultAsync(c => c.Id == id)
-                is not Transport transport)
+            if (await context.Transports.Include(o => o.OwnerNavigation).Include(o => o.TypeNavigation)
+                .FirstOrDefaultAsync(c => c.Id == id) is not Transport transport)
                 return BadRequest("This transport doesn't exist");
 
             return Ok(transport);
@@ -48,15 +50,15 @@ namespace SimbirGOAPI.Controllers
 
             await context.Transports.AddAsync(new Transport
             {
-                Owner = int.Parse(User.GetClaimValue(nameof(Models.User.Id))),
+                Owner = UserId,
                 CanRented = transport.CanBeRented,
                 Type = (int)type,
                 Model = transport.Model,
                 Color = (int)color,
                 Identifier = transport.Identifier,
                 Description = transport.Description,
-                Latitude = (decimal)transport.Latitude,
-                Longitude = (decimal)transport.Longitude,
+                Latitude = transport.Latitude,
+                Longitude = transport.Longitude,
                 MinutePrice = transport.MinutePrice,
                 DayPrice = transport.DayPrice
             });
@@ -72,12 +74,11 @@ namespace SimbirGOAPI.Controllers
             if (transport.Color.GetEnumValue<ColorEnum>() is not ColorEnum color)
                 return BadRequest("This color doesn't exist");
 
-            if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.User == long
-                .Parse(User.GetClaimValue(nameof(Models.User.Id)))) == null)
+            if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id
+                && t.Owner == UserId) == null)
                 return BadRequest("Transport doesn't exist or the user is not the owner");
 
-            Transport updateTransport = await context.Transports.FirstAsync(u => u.Id == long
-                .Parse(User.GetClaimValue(nameof(Models.User.Id))));
+            Transport updateTransport = await context.Transports.FirstAsync(u => u.Id == UserId);
 
             updateTransport.CanRented = transport.CanBeRented;
             updateTransport.Model = transport.Model;
@@ -98,8 +99,8 @@ namespace SimbirGOAPI.Controllers
         [HttpDelete($"{{{nameof(id)}}}")]
         public async Task<ActionResult<Transport>> Delete(long id)
         {
-            if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.User == long
-                .Parse(User.GetClaimValue(nameof(Models.User.Id)))) is not Transport transport)
+            if (await context.Transports.FirstOrDefaultAsync(t => t.Id == id && t.Owner == UserId)
+                is not Transport transport)
                 return BadRequest("Transport doesn't exist or the user is not the owner");
 
             context.Remove(transport);

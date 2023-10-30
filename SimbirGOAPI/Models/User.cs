@@ -31,8 +31,5 @@ public partial class User
     public virtual Role RoleNavigation { get; set; } = null!;
 
     [InverseProperty("OwnerNavigation")]
-    public virtual ICollection<Transport> TransportOwnerNavigations { get; set; } = new List<Transport>();
-
-    [InverseProperty("UserNavigation")]
-    public virtual ICollection<Transport> TransportUserNavigations { get; set; } = new List<Transport>();
+    public virtual ICollection<Transport> Transports { get; set; } = new List<Transport>();
 }

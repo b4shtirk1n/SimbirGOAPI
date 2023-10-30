@@ -16,16 +16,13 @@ public partial class Rent
 
     public long User { get; set; }
 
-    [Precision(5, 0)]
-    public TimeOnly TimeStart { get; set; }
-
-    [Precision(5, 0)]
-    public TimeOnly? TimeEnd { get; set; }
-
-    [Precision(7, 2)]
-    public decimal? Price { get; set; }
-
     public long Type { get; set; }
+
+    [Column(TypeName = "timestamp without time zone")]
+    public DateTime TimeStart { get; set; }
+
+    [Column(TypeName = "timestamp without time zone")]
+    public DateTime? TimeEnd { get; set; }
 
     [ForeignKey("Transport")]
     [InverseProperty("Rents")]

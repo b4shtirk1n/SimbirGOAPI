@@ -12,8 +12,6 @@ public partial class Transport
     [Key]
     public long Id { get; set; }
 
-    public long User { get; set; }
-
     public bool CanRented { get; set; }
 
     [StringLength(50)]
@@ -43,7 +41,7 @@ public partial class Transport
     public long Type { get; set; }
 
     [ForeignKey("Owner")]
-    [InverseProperty("TransportOwnerNavigations")]
+    [InverseProperty("Transports")]
     public virtual User OwnerNavigation { get; set; } = null!;
 
     [InverseProperty("TransportNavigation")]
@@ -52,8 +50,4 @@ public partial class Transport
     [ForeignKey("Type")]
     [InverseProperty("Transports")]
     public virtual TransportType TypeNavigation { get; set; } = null!;
-
-    [ForeignKey("User")]
-    [InverseProperty("TransportUserNavigations")]
-    public virtual User UserNavigation { get; set; } = null!;
 }

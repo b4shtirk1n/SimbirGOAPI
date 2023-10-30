@@ -80,17 +80,13 @@ public partial class SimbirGODbContext : DbContext
 
             entity.Property(e => e.Id).UseIdentityAlwaysColumn();
 
-            entity.HasOne(d => d.OwnerNavigation).WithMany(p => p.TransportOwnerNavigations)
+            entity.HasOne(d => d.OwnerNavigation).WithMany(p => p.Transports)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Owner_fkey");
 
             entity.HasOne(d => d.TypeNavigation).WithMany(p => p.Transports)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("TransportType_fkey");
-
-            entity.HasOne(d => d.UserNavigation).WithMany(p => p.TransportUserNavigations)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("User_fkey");
         });
 
         modelBuilder.Entity<TransportType>(entity =>

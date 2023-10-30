@@ -13,10 +13,10 @@ namespace SimbirGOAPI.Models
 
         [Required]
         [Precision(5, 0)]
-        public TimeOnly Start { get; set; }
+        public DateTime Start { get; set; }
 
         [Precision(5, 0)]
-        public TimeOnly End { get; set; }
+        public DateTime End { get; set; }
 
         [Required]
         [Precision(6, 2)]
