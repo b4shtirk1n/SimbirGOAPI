@@ -24,6 +24,9 @@ public partial class Rent
     [Column(TypeName = "timestamp without time zone")]
     public DateTime? TimeEnd { get; set; }
 
+    [Precision(7, 2)]
+    public decimal? Price { get; set; }
+
     [ForeignKey("Transport")]
     [InverseProperty("Rents")]
     public virtual Transport TransportNavigation { get; set; } = null!;

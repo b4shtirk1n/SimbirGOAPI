@@ -12,10 +12,8 @@ namespace SimbirGOAPI.Models
         public long User { get; set; }
 
         [Required]
-        [Precision(5, 0)]
         public DateTime Start { get; set; }
 
-        [Precision(5, 0)]
         public DateTime End { get; set; }
 
         [Required]
@@ -26,6 +24,6 @@ namespace SimbirGOAPI.Models
         public string Type { get; set; } = null!;
 
         [Precision(7, 2)]
-        public string Price { get; set; } = null!;
+        public decimal Price { get; set; }
     }
 }

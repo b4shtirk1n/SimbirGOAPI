@@ -87,9 +87,10 @@ namespace SimbirGOAPI.Controllers
             if (rentType.GetEnumValue<RentEnum>() is not RentEnum type)
                 return BadRequest("This color doesn't exist");
 
-            if (await context.Rents.Include(o => o.TransportNavigation).FirstOrDefaultAsync(r
-                => r.TransportNavigation.Owner != UserId && r.Transport == transportId
-                && r.Type == (int)type) == null)
+            Transport? transport = await context.Transports.FirstOrDefaultAsync(r => r.Owner != UserId);
+
+            if (transport == null && await context.Rents.Include(o => o.TransportNavigation).FirstOrDefaultAsync(r
+                => r.Transport == transportId && r.Type == (int)type) == null)
                 return BadRequest();
 
             await context.Rents.AddAsync(new Rent
@@ -99,6 +100,7 @@ namespace SimbirGOAPI.Controllers
                 Type = (int)type,
                 TimeStart = DateTime.Now
             });
+            transport!.CanRented = false;
             await context.SaveChangesAsync();
 
             return Ok();
@@ -111,6 +113,7 @@ namespace SimbirGOAPI.Controllers
                 => r.User == UserId) is not Rent rent)
                 return BadRequest();
 
+            rent.TransportNavigation.CanRented = true;
             rent.TransportNavigation.Latitude = lat;
             rent.TransportNavigation.Latitude = @long;
             rent.TimeEnd = DateTime.Now;

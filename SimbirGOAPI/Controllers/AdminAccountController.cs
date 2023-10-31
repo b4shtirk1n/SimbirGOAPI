@@ -102,7 +102,7 @@ namespace SimbirGOAPI.Controllers
             if (await context.Users.FindAsync(id) is not User user)
                 return BadRequest(Error.USER_DOESNT_EXIST);
 
-            context.Remove(user);
+            context.Users.Remove(user);
             await context.SaveChangesAsync();
 
             return Ok();
